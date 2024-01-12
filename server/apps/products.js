@@ -1,15 +1,92 @@
 import { Router } from "express";
+import { db } from "../utils/db.js";
+import { ObjectId } from "mongodb";
 
 const productRouter = Router();
 
-productRouter.get("/", (req, res) => {});
+productRouter.get("/", async (req, res) => {
+  try {
+    const collection = db.collection("products");
 
-productRouter.get("/:id", (req, res) => {});
+    const productData = await collection.find().toArray();
 
-productRouter.post("/", (req, res) => {});
+    return res.json({
+      data: productData,
+    });
+  } catch (error) {
+    return res.json(`${error}`);
+  }
+});
 
-productRouter.put("/:id", (req, res) => {});
+productRouter.get("/:id", async (req, res) => {
+  try {
+    const collection = db.collection("products");
 
-productRouter.delete("/:id", (req, res) => {});
+    const productId = new ObjectId(req.params.id);
+    const productById = await collection.findOne({ _id: productId });
+    return res.json({
+      data: productById,
+    });
+  } catch (error) {
+    return res.json(`${error}`);
+  }
+});
+
+productRouter.post("/", async (req, res) => {
+  try {
+    const collection = db.collection("products");
+
+    const productData = { ...req.body, created_at: new Date() };
+    const newProductData = await collection.insertOne(productData);
+
+    return res.json({
+      message: `Product has been created successfully`,
+    });
+  } catch (error) {
+    return res.json(`${error}`);
+  }
+});
+
+productRouter.put("/:id", async (req, res) => {
+  try {
+    const collection = db.collection("products");
+    const productId = new ObjectId(req.params.id);
+    const newProduct = { ...req.body };
+
+    await collection.updateOne(
+      {
+        _id: productId,
+      },
+      {
+        $set: newProduct,
+      }
+    );
+
+    return res.json({
+      message: {
+        message: "Product has been updated successfully",
+      },
+    });
+  } catch (error) {
+    return res.json(`${error}`);
+  }
+});
+
+productRouter.delete("/:id", async (req, res) => {
+  try {
+    const collection = db.collection("products");
+    const productsId = new ObjectId(req.params.id);
+
+    await collection.deleteOne({
+      _id: productsId,
+    });
+
+    return res.json({
+      message: "Product has been deleted successfully",
+    });
+  } catch (error) {
+    return res.json(`${error}`);
+  }
+});
 
 export default productRouter;

@@ -6,9 +6,22 @@ const productRouter = Router();
 
 productRouter.get("/", async (req, res) => {
   try {
+    const name = req.query.keywords;
+    const category = req.query.category;
+
+    const query = {};
+
+    if (name) {
+      query.name = new RegExp(name, "i");
+    }
+
+    if (category === "it" || category === "fashion" || category === "food") {
+      query.category = new RegExp(category, "i");
+    }
+
     const collection = db.collection("products");
 
-    const productData = await collection.find().toArray();
+    const productData = await collection.find(query).limit(10).toArray();
 
     return res.json({
       data: productData,

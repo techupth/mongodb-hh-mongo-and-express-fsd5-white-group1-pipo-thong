@@ -21,7 +21,11 @@ productRouter.get("/", async (req, res) => {
 
     const collection = db.collection("products");
 
-    const productData = await collection.find(query).limit(10).toArray();
+    const productData = await collection
+      .find(query)
+      .limit(10)
+      .toArray()
+      .sort({ created_at: -1 });
 
     return res.json({
       data: productData,
